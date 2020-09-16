@@ -10,7 +10,7 @@ using System.Text.RegularExpressions;
 
 namespace speard_report
 {
-    class CheckSession : ILogSource
+    class CheckSession : ILogSource 
     {
         public string LogSourceName
         {
@@ -34,18 +34,20 @@ namespace speard_report
             m_LondonTradingSession = ParseSessionTime(iniReader.ReadSetting("Settings", "LondonTradingSession"));
             m_USTradingSession = ParseSessionTime(iniReader.ReadSetting("Settings", "USTradingSession"));
         }
-        public void FillByseasionTime(out IEnumerable<IGrouping<string, AverageSpread>> group1, out IEnumerable<IGrouping<string, AverageSpread>> group2, out IEnumerable<IGrouping<string, AverageSpread>> group3)
+        public void FillByseasionTime(
+            out IEnumerable<IGrouping<string, AverageSpread>> groupAsia, 
+            out IEnumerable<IGrouping<string, AverageSpread>> groupLondon, 
+            out IEnumerable<IGrouping<string, AverageSpread>> groupUS)
         {
-            group1 = AvregateBySession(m_AsianTradingSession[0], m_AsianTradingSession[1]);
-            group2 = AvregateBySession(m_LondonTradingSession[0], m_LondonTradingSession[1]);
-            group3 = AvregateBySession(m_USTradingSession[0], m_USTradingSession[1]);
+            groupAsia = AvregateBySession(m_AsianTradingSession[0], m_AsianTradingSession[1]);
+            groupLondon = AvregateBySession(m_LondonTradingSession[0], m_LondonTradingSession[1]);
+            groupUS = AvregateBySession(m_USTradingSession[0], m_USTradingSession[1]);
         }
         private IEnumerable<IGrouping<string, AverageSpread>> AvregateBySession(TimeSpan start, TimeSpan end)
         {
             try
             {
                 //ITable<Symbol> tableSybol = m_data.SymbolTable;
-
                 DateTime startTime = CreateWithTimeSpan(start);
                 DateTime endTime = CreateWithTimeSpan(end);
                 TimeSpan accuracy = TimeSpan.FromMilliseconds(999);
@@ -61,7 +63,6 @@ namespace speard_report
                       & Search.FieldSmallerOrEqual("TimeStamp", endTime.Add(accuracy))
                       & Search.FieldEquals("Duration", 300)).GroupBy(x => x.Symbol.Replace("/", string.Empty));
                 this.LogInfo("<cyan>Number of rows: {0}", groupSymbol.Count());
-
                 return groupSymbol;
             }
             catch (Exception)
@@ -72,7 +73,7 @@ namespace speard_report
         }
         public static DateTime CreateWithTimeSpan(TimeSpan timeSpan)
         {
-            DateTime current = new DateTime(2018, 07, 13);
+            DateTime current = new DateTime(2018, 08, 21); //07 05
             DateTime datetime = current.Subtract(TimeSpan.FromDays(1)) // Previous day
                 .Subtract(current.TimeOfDay) // Set the time
                 .Add(timeSpan);
